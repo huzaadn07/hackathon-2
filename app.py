@@ -1,4 +1,3 @@
-
 """Spending Analyzer: dashboard UI and frontend for the hackathon project.
 
 Pipeline: app.py -> pdf_parser.py -> prompts.py -> gemma_agent.py
@@ -6,6 +5,7 @@ Pipeline: app.py -> pdf_parser.py -> prompts.py -> gemma_agent.py
 """
 
 
+import os
 import csv
 import io
 import json
@@ -127,30 +127,11 @@ class Pipeline:
 
 
 class DemoSteps:
-
-    DEMO_JSON = """```json
-{
-  "summary": "Eating out and subscriptions drove most of your overspending.",
-  "total_spent": 1420.5,
-  "overspent": [
-    {"category": "Eating out", "spent": 312, "typical": 200,
-     "note": "14 takeaway orders in one month"},
-    {"category": "Subscriptions", "spent": 64, "typical": 30,
-     "note": "Three services look unused"},
-    {"category": "Transport", "spent": 180, "typical": 150}
-  ],
-  "underspent": [
-    {"category": "Groceries", "spent": 160, "typical": 220},
-    {"category": "Entertainment", "spent": 20, "typical": 60}
-  ],
-  "suggestions": [
-    "Cap takeaways at 6 a month",
-    "Cancel unused subscriptions",
-    "Move spare grocery budget into savings"
-  ],
-  "data_quality": "Good: all transactions were categorised"
-}
-```"""
+    # Build the path relative to this file or the current working directory
+    file_path = os.path.join(os.path.dirname(__file__), "example_output.json") if "__file__" in locals() else "example_output.json"
+    
+    with open("example_output.json", "r", encoding="utf-8") as _file:
+        DEMO_JSON = _file.read()
 
 
     @staticmethod
@@ -349,8 +330,8 @@ class ReportBuilder:
     
     SUMMARY = ("summary", "overview", "analysis")
     TOTAL = ("total_spent", "total", "total_spending")
-    OVER = ("overspent", "overspending", "overspend", "over_budget")
-    UNDER = ("underspent", "underspending", "underspend", "under_budget")
+    OVER = ("overspent", "overspending", "overspend", "over_budget", "categories")
+    UNDER = ("underspent", "underspending", "underspend", "under_budget", "subscriptions")
     TIPS = ("suggestions", "recommendations", "cutbacks", "tips", "advice")
 
 
@@ -364,14 +345,30 @@ class ReportBuilder:
             return Report(extras={"result": data}) if data else Report()
         mapping = cast(dict[str, Any], data)
         used: set[str] = set()
-        summary = cls._take(mapping, cls.SUMMARY, used)
-        total = cls._take(mapping, cls.TOTAL, used)
+        
+        summary_val = cls._take(mapping, cls.SUMMARY, used)
+        if isinstance(summary_val, dict):
+            total = summary_val.get("total_spent")
+            summary_text = f"Period: {summary_val.get('period', '')} | Total Income: {summary_val.get('total_income', 0)}"
+        else:
+            summary_text = str(summary_val).strip() if summary_val else ""
+            total = cls._take(mapping, cls.TOTAL, used)
+
         over = cls._take(mapping, cls.OVER, used)
         under = cls._take(mapping, cls.UNDER, used)
         tips = cls._take(mapping, cls.TIPS, used)
+        
+        if not tips and isinstance(over, list):
+            extracted_tips = []
+            for item in over:
+                if isinstance(item, dict) and "tips" in item:
+                    extracted_tips.extend(item["tips"])
+            if extracted_tips:
+                tips = extracted_tips
+
         return Report(
-            summary=str(summary).strip() if summary else "",
-            total_spent=Numbers.to_float(total),
+            summary=summary_text,
+            total_spent=Numbers.to_float(total) if total is not None else (summary_val.get("total_spent") if isinstance(summary_val, dict) else None),
             overspent=RowParser.parse(over),
             underspent=RowParser.parse(under),
             suggestions=cls._tips(tips),
