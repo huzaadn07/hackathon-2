@@ -1,21 +1,31 @@
-import os
+import time
+import traceback
 from google import genai
 from dotenv import load_dotenv
 
-load_dotenv() 
+load_dotenv()
 
-def analyze_spending(bank_statement_text, prompt_instructions):
-    try:
-        client = genai.Client() 
-    except Exception as e:
-        return f"Error initializing client: Ensure GEMINI_API_KEY is set. Details: {e}"
-    
 
-    full_content = f"{prompt_instructions}\n\nHere is the data:\n{bank_statement_text}"
-    
+def analyze_spending(full_prompt):
     try:
-        response = client.models.generate_content(model='gemma-4-31b-it', contents=full_content)
-        return response.text
-    except Exception as e:
-        return f"API Error: {e}"
-    
+        client = genai.Client()
+    except Exception:
+        return traceback.format_exc()
+
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(model="gemma-4-31b-it",contents=full_prompt)
+
+            if hasattr(response, "text") and response.text:
+                return response.text
+
+            return '{"summary":{"total_spent":0,"total_income":0,"period":"Unknown","currency":"GBP"},"categories":[],"subscriptions":[],"transactions":[]}'
+
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+
+            if attempt < 2:
+                time.sleep(2)
+                continue
+
+            return traceback.format_exc()

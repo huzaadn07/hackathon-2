@@ -51,20 +51,11 @@ def build_prompt(statement_text: str) -> str:
     Strings are joined rather than put in one f-string, so the JSON example
     needs no {{ }} brace escaping.
     """
-    return (
-        SYSTEM
-        + "\n"
-        + INSTRUCTIONS
-        + "\nOUTPUT SHAPE EXAMPLE (fake values, do NOT copy them):\n"
-        + json.dumps(EXAMPLE, indent=2)
-        + '\n\nSTATEMENT:\n"""\n'
-        + statement_text
-        + '\n"""\n'
-    )
+    return (SYSTEM + "\n" + INSTRUCTIONS + "\nOUTPUT SHAPE EXAMPLE (fake values, do NOT copy them):\n" + json.dumps(EXAMPLE, indent=2) + '\n\nSTATEMENT:\n"""\n' + statement_text + '\n"""\n')
 
 
 # ---------------------------------------------------------------------------
-# JSON schema (forces the model server to return this exact structure)
+# JSON schema used to format answer correctly
 # ---------------------------------------------------------------------------
 SCHEMA = {
     "type": "object",
