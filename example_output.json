@@ -1,0 +1,28 @@
+{
+  "transactions": [
+    {"date": "2026-01-05", "merchant": "Example Cafe", "amount": 4.50, "type": "debit"}
+  ],
+  "summary": {
+    "total_spent": 4.50,
+    "total_income": 0.00,
+    "period": "01 Jan 2026 to 31 Jan 2026",
+    "currency": "GBP"
+  },
+  "subscriptions": [
+    {
+      "name": "Example Streaming",
+      "amount": 9.99,
+      "frequency": "monthly",
+      "yearly_cost": 119.88,
+      "confidence": "high",
+      "note": "Charged every month. Potentially removable if unused."
+    }
+  ],
+  "categories": [
+    {
+      "name": "Eating Out",
+      "total": 4.50,
+      "tips": ["You made 1 Example Cafe purchase of 4.50. Making coffee at home saves this."]
+    }
+  ]
+}
