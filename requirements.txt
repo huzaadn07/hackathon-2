@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 streamlit
 pdfplumber
 google-genai
