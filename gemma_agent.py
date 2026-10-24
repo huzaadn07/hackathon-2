@@ -18,17 +18,4 @@ def analyze_spending(bank_statement_text, prompt_instructions):
         return response.text
     except Exception as e:
         return f"API Error: {e}"
-
-
-if __name__ == "__main__":
-    # Test inputs
-    test_data = "Starbucks: $5.00, Amazon: $120.00, Rent: $1000.00"
-    test_prompt = "Give me a one-sentence summary of this spending."
     
-    print("Sending text to Gemma 4...")
-    
-    # Run the function
-    result = analyze_spending(test_data, test_prompt)
-    
-    print("\n--- Response ---")
-    print(result)
