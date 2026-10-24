@@ -1,19 +1,33 @@
-""" The "fat finger" safety filter:
-In trading a fat finger error is when a trader accidentally adds an extra zero. 
-For example, when a trader buys 1,000,000 shares instead of 100,000 and accidentally crashes a market.
-We build a safety buffer for retail traders.
- Instead of tracking a pdf, we monitor a local folder where a trader saves their planned logs or excel sheets. 
- The moment the script detects a change it reads the text and sends it to the Gemma 4 api with a simple prompt
- "Look at these numbers. Are there any massive percentage jumps or weird anomalies compared to typical orders"
- And we display a clean ui. If everything seems normal it shows a green checkmark if Gemma flags any weird number jumps the screen flashes red with a safety warning
- 
-Right now our basic math model flags a trade if its simply 10x larger than a fixed normal size, if we have extra time we will make it dynamic. 
- The upgrade: Have our script calculate a moving average (μ) and the standard deviation (σ) of the traders last 20 trades
- The formula: Calculate a Z-Score for the incoming trade size (x):
- Z = X - Μ / Σ
- The logic:
- - If |Z| > 3. The trade is statiscally an extreme outlier ( beyond 99.7% of normal variations).
- - X represents the test statistic for the trade metric
- - M is the mean average for the trade metric being evaluated
- - Σ is the normal standard deviation for historical trade data
- """
+LEDGER LENS
+Technical Specification & Overview
+Document Version: 1.0.4 Project Status: Active Development
+SYSTEM OVERVIEW Leder Lens is an automated document parsing and financial intelligence engine. It ingests raw user-submitted transactional documentation—including physical receipts, digital invoices, and multi-page bank statements—extracts textual data, and leverages the Gemma 4 large language model to produce structured financial insights.
+The primary objective of the engine is to isolate recurring inefficiencies in personal or small-business cash flow and surface high-yield savings opportunities.
+END-TO-END PIPELINE ARCHITECTURE
+[ Phase A: Ingestion & Text Extraction ]
+User drops financial assets (PDFs, high-res images, plain text) into the UI window.
+Client passes the payload to the preprocessing service.
+Optical Character Recognition (OCR) and document text extraction routines normalize raw pixels and binary streams into structured string outputs.
+[ Phase B: Intelligence & Schema Structuring ]
+Extracted text payloads are structured and sent directly to the Gemma 4 AI engine.
+Prompt directives force Gemma 4 to parse arbitrary expense strings, isolate line items, classify transaction taxonomy, and generate a standardized JSON schema.
+[ Phase C: Rule Evaluation & Insights Generation ]
+The parsed JSON data is processed against heuristic financial rules.
+System surfaces direct savings vector analysis, including:
+Identifying overlapping or redundant subscription tiers.
+Detecting recurring vendor flags where cheaper alternatives exist (e.g., supermarket shifts).
+Outlining systemic baseline spending leaks.
+[ Phase D: Client Presentation ]
+Clean, structured financial insights are transmitted back to the client interface for immediate review by the end user.
+KEY FUNCTIONAL MODULES
+Ingestion Interface: Handles multi-format file staging and client-side validation.
+OCR Engine: Converts document layouts into linear, machine-readable text arrays.
+Gemma 4 Inference Gateway: Handles token packaging, contextual prompt wrapping, and response validation against target JSON schemas.
+Savings Heuristics Unit: Applies algorithmic checks across subscription signatures, merchant categories, and recurring bill cadence.
+ENVIRONMENT & SETUP NOTES
+Dependencies:
+Node.js or Python runtime environment.
+Configured access tokens for Gemma 4 model inference endpoints.
+Configuration:
+Set up system environment variables containing server port settings and Gemma 4 API credentials within local configuration environment files.
+Install standard package dependencies via system package manager before launch.
